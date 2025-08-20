@@ -110,12 +110,14 @@ export class ProductsService {
 
     //Solo funciona para Sqlite, de querer usar otro motor db, usar truncate en lugar de DELETE FROM
     async resetAllProducts() {
-        await this.prisma.$transaction([
-            this.prisma.product.deleteMany(),
-            this.prisma.$executeRawUnsafe(
-                `DELETE FROM "sqlite_sequence" WHERE "name" = "Product"`,
-            ),
-        ]);
-        return 'La tabla ha sido reseteada correctamente.';
+        try {
+            await this.prisma.$executeRawUnsafe(
+                `TRUNCATE TABLE "Product" RESTART IDENTITY CASCADE;`,
+            );
+            return 'La tabla ha sido reseteada correctamente.';
+        } catch (error) {
+            console.error('Error al resetear la tabla:', error);
+            throw new Error('No se pudo resetear la tabla de productos.');
+        }
     }
 }
