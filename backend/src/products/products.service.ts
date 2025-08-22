@@ -15,17 +15,32 @@ import { error } from 'console';
 export class ProductsService {
     constructor(private readonly prisma: PrismaService) {}
 
-    async getAllProducts(): Promise<ProductResponseDto[]> {
-        const allProducts = await this.prisma.product.findMany();
+    // Obtiene todos los productos que pertenecen al usuario especificado por su `userId`.
+    async getAllProducts(userId: number): Promise<ProductResponseDto[]> {
+        const allProducts = await this.prisma.product.findMany({
+            where: {
+                userId: userId,
+            },
+        });
+        if (!allProducts.length) {
+            throw new NotFoundException(
+                `Actualmente no hay tareas registradas`,
+            );
+        }
         return allProducts.map((product) =>
             plainToInstance(ProductResponseDto, product),
         );
     }
 
-    async getProductById(productId: number): Promise<ProductResponseDto> {
-        const product = await this.prisma.product.findUnique({
+    // Obtiene un producto específico por su 'productId', asegurando que pertenezca al usuario especificado por 'userId'.
+    async getProductById(
+        userId: number,
+        productId: number,
+    ): Promise<ProductResponseDto> {
+        const product = await this.prisma.product.findFirst({
             where: {
                 id: productId,
+                userId: userId,
             },
         });
         if (!product) {
@@ -39,6 +54,7 @@ export class ProductsService {
 
     async createProduct(
         createProductData: CreateProductDto,
+        userId: number,
     ): Promise<ProductResponseDto> {
         try {
             const createProduct = await this.prisma.product.create({

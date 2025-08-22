@@ -8,6 +8,7 @@ import { SignUpDto } from './dtos/signUp.dto';
 import * as bcrypt from 'bcryptjs';
 import { UpdateUserDto } from './dtos/updateUser.dto';
 import { PrismaClientKnownRequestError } from 'generated/prisma/runtime/library';
+import { hashPassword } from 'src/common/utils/bcrypt';
 
 @Injectable()
 export class UserService {
@@ -22,7 +23,7 @@ export class UserService {
         if (userExists) {
             throw new BadRequestException('El usuario ya existe');
         }
-        const hashedPassword = await bcrypt.hash(signUpUserData.password, 10);
+        const hashedPassword = await hashPassword(signUpUserData.password);
         const newUser = await this.prisma.user.create({
             data: {
                 email: signUpUserData.email,
@@ -78,5 +79,13 @@ export class UserService {
                 );
             }
         }
+    }
+
+    async findByEmail(userEmail: string) {
+        return await this.prisma.user.findUnique({
+            where: {
+                email: userEmail,
+            },
+        });
     }
 }
