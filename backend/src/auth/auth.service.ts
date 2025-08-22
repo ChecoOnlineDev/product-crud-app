@@ -2,10 +2,11 @@ import {
     Injectable,
     UnauthorizedException,
     BadRequestException,
+    NotFoundException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { SignUpDto } from './dtos/signUp.dto';
+import { logInDto } from './dtos/logIn.dto';
 import * as bcrypt from 'bcryptjs';
 
 @Injectable()
@@ -15,24 +16,28 @@ export class AuthService {
         private readonly jwtService: JwtService,
     ) {}
 
-    async signUp(registerData: SignUpDto) {
-        const userExists = await this.prisma.user.findUnique({
-            where: {
-                email: registerData.email,
-            },
-        });
-        if (userExists) {
-            throw new BadRequestException('El usuario ya existe');
-        }
-        const hashedPassword = await bcrypt.hash(registerData.password, 10);
-        const newUser = await this.prisma.user.create({
-            data: {
-                email: registerData.email,
-                password: hashedPassword,
-            },
-        });
+    async logIn(logInData: logInDto) {
+        try {
+            const user = await this.prisma.user.findUnique({
+                where: {
+                    email: logInData.email,
+                },
+            });
+            if (!user) {
+                throw new NotFoundException(`Credenciales Invalidas`);
+            }
 
-        const { password, ...userWhitoutPassword } = newUser;
-        return userWhitoutPassword;
+            const isPasswordMatch = await bcrypt.compare(
+                logInData.password,
+                user.password,
+            );
+
+            const payload = {
+                email: user.email,
+                id: user.id,
+            };
+            const accessToken = this.jwtService.sign(payload);
+            return { accessToken };
+        } catch (error) {}
     }
 }

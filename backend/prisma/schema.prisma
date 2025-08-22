@@ -14,13 +14,14 @@ datasource db {
 model User {
   id        Int      @id @default(autoincrement())
   email     String   @unique
+  username  String  @unique
   password  String
   role      String   @default("user")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   deletedAt DateTime @default(now())
 
-  // Relación con el modelo Product
+  // Un usuario puede tener multiples productos pero un producto solo puede tener un usuario
   products Product[]
 }
 
@@ -33,7 +34,6 @@ model Product {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  // Relación con el modelo User
-  userId      Int
-  user        User     @relation(fields: [userId], references: [id])
+  userId Int
+  user   User @relation(fields: [userId], references: [id])
 }

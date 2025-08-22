@@ -4,12 +4,15 @@ import { IsNotEmpty, IsString, IsNumber, IsOptional } from 'class-validator';
 type CreateProductType = Omit<Product, 'id' | 'createdAt' | 'updatedAt'>;
 
 export class CreateProductDto implements CreateProductType {
+    @IsNumber()
+    @IsNotEmpty()
+    userId: number;
+
     @IsNotEmpty()
     @IsString()
     name: string;
 
     @IsOptional()
-    @IsString()
     description: string | null;
 
     @IsNotEmpty()
