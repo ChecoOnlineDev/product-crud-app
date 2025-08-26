@@ -8,7 +8,6 @@ import {
     Post,
 } from '@nestjs/common';
 import { UserService } from './user.service';
-import { SignUpDto } from '../auth/dtos/signUp.dto';
 import { UpdateUserDto } from './dtos/updateUser.dto';
 
 @Controller('user')

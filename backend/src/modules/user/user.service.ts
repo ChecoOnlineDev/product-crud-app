@@ -4,16 +4,16 @@ import {
     NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { SignUpDto } from '../auth/dtos/signUp.dto';
-import * as bcrypt from 'bcryptjs';
 import { UpdateUserDto } from './dtos/updateUser.dto';
 import { PrismaClientKnownRequestError } from 'generated/prisma/runtime/library';
-import { hashPassword } from 'src/common/utils/bcrypt';
+
+import { Prisma } from 'generated/prisma';
 
 @Injectable()
 export class UserService {
     constructor(private readonly prisma: PrismaService) {}
 
+    //Usado para el servicio signUp en el modulo de autenticacion
     async createUser(data: Prisma.UserCreateInput) {
         return this.prisma.user.create({ data });
     }

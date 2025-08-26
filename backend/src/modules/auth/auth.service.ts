@@ -5,13 +5,13 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from 'src/prisma/prisma.service';
-import UserRole from '@prisma/client';
 import { logInDto } from './dtos/logIn.dto';
 import * as bcrypt from 'bcryptjs';
 import { JwtPayload } from 'src/common/classes/jwt-payload.class';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { UserService } from '../user/user.service';
 import { SignUpDto } from './dtos/signUp.dto';
+import { UserRole } from 'generated/prisma';
 
 @Injectable()
 export class AuthService {
@@ -22,7 +22,6 @@ export class AuthService {
     ) {}
 
     async signUp(signUpUserData: SignUpDto) {
-        // Verifica si el usuario ya existe, usando una excepción genérica
         const userExists = await this.userService.findByEmail(
             signUpUserData.email,
         );
@@ -32,21 +31,19 @@ export class AuthService {
             );
         }
 
-        // Hashea la contraseña directamente aquí para una mejor cohesión
         const hashedPassword = await bcrypt.hash(signUpUserData.password, 10);
 
-        // Usa el UserService para crear el usuario, asignando el rol por defecto
         const newUser = await this.userService.createUser({
             ...signUpUserData,
             password: hashedPassword,
             role: UserRole.USER, // Asigna el rol por defecto
         });
 
-        // Genera y retorna el JWT
         const payload: JwtPayload = {
             userId: newUser.id,
             email: newUser.email,
             role: newUser.role,
+            username: newUser.username,
         };
         const token = this.jwtService.sign(payload);
         const { password, ...user_without_password } = newUser;
@@ -77,6 +74,7 @@ export class AuthService {
                 userId: user.id,
                 username: user.username,
                 email: user.email,
+                role: user.role,
             };
 
             const token = this.jwtService.sign(payload);
@@ -90,7 +88,6 @@ export class AuthService {
             if (error instanceof PrismaClientKnownRequestError) {
                 throw new BadRequestException('Error en la base de datos');
             }
-            //Si el error no es parte de prisma, prog
 
             throw error;
         }
