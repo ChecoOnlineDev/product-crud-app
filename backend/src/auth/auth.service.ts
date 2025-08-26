@@ -1,15 +1,16 @@
+// src/auth/auth.service.ts
+
 import {
     Injectable,
     UnauthorizedException,
     BadRequestException,
-    NotFoundException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { logInDto } from './dtos/logIn.dto';
 import * as bcrypt from 'bcryptjs';
-import { comparePasswords } from 'src/common/utils/bcrypt';
 import { JwtPayload } from 'src/common/classes/jwt-payload.class';
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 
 @Injectable()
 export class AuthService {
@@ -25,29 +26,35 @@ export class AuthService {
                     email: logInData.email,
                 },
             });
-            if (!user) {
-                throw new NotFoundException(`Credenciales Invalidas`);
-            }
 
-            const isValidPassword = await comparePasswords(
-                logInData.password,
-                user.password,
-            );
-            if (!isValidPassword) {
-                throw new NotFoundException(`Contraseña Incorrecta`);
+            const userFoundAndValidPassword =
+                user &&
+                (await bcrypt.compare(logInData.password, user.password));
+
+            if (!userFoundAndValidPassword) {
+                throw new UnauthorizedException('Credenciales Invalidas');
             }
 
             const payload: JwtPayload = {
-                user_id: user.id,
+                userId: user.id,
                 username: user.username,
                 email: user.email,
             };
+
             const token = this.jwtService.sign(payload);
-            const { password, ...user_whithout_password } = user;
+            const { password, ...user_without_password } = user;
+
             return {
                 accessToken: token,
-                user: user_whithout_password,
+                user: user_without_password,
             };
-        } catch (error) {}
+        } catch (error) {
+            if (error instanceof PrismaClientKnownRequestError) {
+                throw new BadRequestException('Error en la base de datos');
+            }
+            //Si el error no es parte de prisma, prog
+
+            throw error;
+        }
     }
 }
