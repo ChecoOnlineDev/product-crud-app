@@ -8,17 +8,12 @@ import {
     Post,
 } from '@nestjs/common';
 import { UserService } from './user.service';
-import { SignUpDto } from './dtos/signUp.dto';
+import { SignUpDto } from '../auth/dtos/signUp.dto';
 import { UpdateUserDto } from './dtos/updateUser.dto';
 
 @Controller('user')
 export class UserController {
     constructor(private readonly userService: UserService) {}
-
-    @Post('signUp')
-    signUp(@Body() signUpUserData: SignUpDto) {
-        return this.userService.signUp(signUpUserData);
-    }
 
     @Patch('updateUser/:id')
     updateUser(

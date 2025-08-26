@@ -4,7 +4,7 @@ import {
     NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { SignUpDto } from './dtos/signUp.dto';
+import { SignUpDto } from '../auth/dtos/signUp.dto';
 import * as bcrypt from 'bcryptjs';
 import { UpdateUserDto } from './dtos/updateUser.dto';
 import { PrismaClientKnownRequestError } from 'generated/prisma/runtime/library';
@@ -14,26 +14,8 @@ import { hashPassword } from 'src/common/utils/bcrypt';
 export class UserService {
     constructor(private readonly prisma: PrismaService) {}
 
-    async signUp(signUpUserData: SignUpDto) {
-        const userExists = await this.prisma.user.findUnique({
-            where: {
-                email: signUpUserData.email,
-            },
-        });
-        if (userExists) {
-            throw new BadRequestException('El usuario ya existe');
-        }
-        const hashedPassword = await hashPassword(signUpUserData.password);
-        const newUser = await this.prisma.user.create({
-            data: {
-                email: signUpUserData.email,
-                username: signUpUserData.username,
-                password: hashedPassword,
-            },
-        });
-
-        const { password, ...userWhitoutPassword } = newUser;
-        return userWhitoutPassword;
+    async createUser(data: Prisma.UserCreateInput) {
+        return this.prisma.user.create({ data });
     }
 
     async updateUser(userId: number, updateUserData: UpdateUserDto) {

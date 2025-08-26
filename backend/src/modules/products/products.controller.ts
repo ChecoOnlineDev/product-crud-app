@@ -14,7 +14,7 @@ import { ProductsService } from './products.service';
 import { UpdateProductDto } from './dtos/update-product.dto';
 import { CreateProductDto } from './dtos/create-product.dto';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { JwtAuthGuard } from 'src/auth/guards/auth.guard';
+import { JwtAuthGuard } from 'src/modules/auth/guards/auth.guard';
 import { ProductIdParamDto } from './dtos/product-id-param';
 import { JwtPayload } from 'src/common/classes/jwt-payload.class';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
