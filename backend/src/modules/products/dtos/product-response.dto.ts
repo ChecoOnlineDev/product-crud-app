@@ -23,14 +23,14 @@ export class ProductResponseDto implements Product {
     image: string | null;
 
     @Expose()
-    @Transform(({ value }) => value.toLocaleString())
+    @Transform(({ value }) => (value ? value.toLocaleString() : null))
     createdAt: Date;
 
     @Expose()
-    @Transform(({ value }) => value.toLocaleString())
+    @Transform(({ value }) => (value ? value.toLocaleString() : null))
     updatedAt: Date;
 
     @Expose()
-    @Transform(({ value }) => value.toLocaleString())
+    @Transform(({ value }) => (value ? value.toLocaleString() : null))
     deletedAt: Date | null;
 }

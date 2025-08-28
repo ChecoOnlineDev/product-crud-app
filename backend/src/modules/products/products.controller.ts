@@ -18,6 +18,9 @@ import { JwtAuthGuard } from 'src/modules/auth/guards/auth.guard';
 import { ProductIdParamDto } from './dtos/product-id-param';
 import { JwtPayload } from 'src/common/classes/jwt-payload.class';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Roles } from 'src/common/decorators/roles.decorator';
+import { UserRole } from 'generated/prisma';
 
 //localhost:4000/api/products/
 @ApiTags('products')
@@ -93,7 +96,8 @@ export class ProductsController {
     }
 
     @Delete('reset-all-products')
-    @UseGuards(JwtAuthGuard)
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles(UserRole.ADMIN) //requiere un rol de administrador para hacer una peticion a este endpoint
     @ApiOperation({ summary: 'CAUTION' })
     resetAllProducts(@CurrentUser() user: JwtPayload) {
         this.productsService.resetAllProducts();

@@ -3,14 +3,10 @@ import { IsNotEmpty, IsString, IsNumber, IsOptional } from 'class-validator';
 
 type CreateProductType = Omit<
     Product,
-    'id' | 'createdAt' | 'updatedAt' | 'deletedAt'
+    'id' | 'createdAt' | 'updatedAt' | 'deletedAt' | 'userId'
 >;
 
 export class CreateProductDto implements CreateProductType {
-    @IsNumber()
-    @IsNotEmpty()
-    userId: number;
-
     @IsNotEmpty()
     @IsString()
     name: string;

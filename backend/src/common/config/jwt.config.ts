@@ -7,3 +7,10 @@ export const jwtConfigFactory = (
     secret: configService.get<string>('JWT_SECRET'),
     signOptions: { expiresIn: '1h' },
 });
+
+export const jwtRefreshConfigFactory = (
+    configService: ConfigService,
+): JwtModuleOptions => ({
+    secret: configService.get<string>('JWT_REFRESH_SECRET'),
+    signOptions: { expiresIn: '7d' },
+});

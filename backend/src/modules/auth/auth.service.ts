@@ -25,14 +25,20 @@ export class AuthService {
         const userExists = await this.userService.findByEmail(
             signUpUserData.email,
         );
+        const usernameExists = await this.userService.findByUsername(
+            signUpUserData.username,
+        );
         if (userExists) {
             throw new BadRequestException(
                 'Las credenciales proporcionadas ya están en uso',
             );
         }
-
+        if (usernameExists) {
+            throw new BadRequestException(
+                `El nombre de usuario ${signUpUserData.username} ya está en uso. Por favor, elige otro nombre de usuario.`,
+            );
+        }
         const hashedPassword = await bcrypt.hash(signUpUserData.password, 10);
-
         const newUser = await this.userService.createUser({
             ...signUpUserData,
             password: hashedPassword,
