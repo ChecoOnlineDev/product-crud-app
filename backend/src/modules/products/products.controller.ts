@@ -27,6 +27,7 @@ export class ProductsController {
     constructor(private readonly productsService: ProductsService) {}
 
     @Get('all-products')
+    @UseGuards(JwtAuthGuard)
     @ApiOperation({ summary: 'return all products' })
     @ApiResponse({
         status: 200,
@@ -37,6 +38,7 @@ export class ProductsController {
     }
 
     @Get('product/:productId')
+    @UseGuards(JwtAuthGuard)
     @ApiOperation({ summary: 'Return product by id' })
     getProductById(
         @Param() { productId }: ProductIdParamDto,
@@ -46,6 +48,7 @@ export class ProductsController {
     }
 
     @Post('create-product')
+    @UseGuards(JwtAuthGuard)
     @ApiOperation({ summary: 'Create a new product' })
     createProduct(
         @Body() createProductData: CreateProductDto,
@@ -58,31 +61,39 @@ export class ProductsController {
     }
 
     @Patch('update-product/:productId')
+    @UseGuards(JwtAuthGuard)
     @ApiOperation({ summary: 'Update an existing product' })
     updateProduct(
         @Param() { productId }: ProductIdParamDto,
         @Body() updateProductData: UpdateProductDto,
         @CurrentUser() user: JwtPayload,
     ) {
-        return this.productsService.updateProduct(productId, updateProductData);
+        return this.productsService.updateProduct(
+            productId,
+            updateProductData,
+            user.userId,
+        );
     }
 
     @Delete('delete-product/:productId')
+    @UseGuards(JwtAuthGuard)
     @ApiOperation({ summary: 'Delete a product by id' })
     deleteProduct(
         @Param() { productId }: ProductIdParamDto,
         @CurrentUser() user: JwtPayload,
     ) {
-        return this.productsService.deleteProduct(productId);
+        return this.productsService.deleteProduct(productId, user.userId);
     }
 
     @Delete('delete-all-products')
+    @UseGuards(JwtAuthGuard)
     @ApiOperation({ summary: 'Delete all products' })
     deleteAllProducts(@CurrentUser() user: JwtPayload) {
-        return this.productsService.deleteAllProducts();
+        return this.productsService.deleteAllProducts(user.userId);
     }
 
     @Delete('reset-all-products')
+    @UseGuards(JwtAuthGuard)
     @ApiOperation({ summary: 'CAUTION' })
     resetAllProducts(@CurrentUser() user: JwtPayload) {
         this.productsService.resetAllProducts();

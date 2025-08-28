@@ -29,4 +29,8 @@ export class ProductResponseDto implements Product {
     @Expose()
     @Transform(({ value }) => value.toLocaleString())
     updatedAt: Date;
+
+    @Expose()
+    @Transform(({ value }) => value.toLocaleString())
+    deletedAt: Date | null;
 }

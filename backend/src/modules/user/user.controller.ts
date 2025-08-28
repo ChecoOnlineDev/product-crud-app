@@ -1,29 +1,25 @@
-import {
-    Body,
-    Controller,
-    Delete,
-    Param,
-    ParseIntPipe,
-    Patch,
-    Post,
-} from '@nestjs/common';
+import { Body, Controller, Delete, Patch, UseGuards } from '@nestjs/common';
 import { UserService } from './user.service';
 import { UpdateUserDto } from './dtos/updateUser.dto';
+import { JwtAuthGuard } from '../auth/guards/auth.guard';
+import { CurrentUser } from 'src/common/decorators/current-user.decorator';
+import { JwtPayload } from 'src/common/classes/jwt-payload.class';
 
+@UseGuards(JwtAuthGuard)
 @Controller('user')
 export class UserController {
     constructor(private readonly userService: UserService) {}
 
-    @Patch('updateUser/:id')
+    @Patch('updateUser')
     updateUser(
         @Body() updateUserData: UpdateUserDto,
-        @Param('id', ParseIntPipe) userId: number,
+        @CurrentUser() user: JwtPayload,
     ) {
-        return this.userService.updateUser(userId, updateUserData);
+        return this.userService.updateUser(user.userId, updateUserData);
     }
 
-    @Delete('deleteUser/:id')
-    deleteUser(@Param('id', ParseIntPipe) userId: number) {
-        return this.userService.deleteUser(userId);
+    @Delete('deleteUser')
+    deleteUser(@CurrentUser() user: JwtPayload) {
+        return this.userService.deleteUser(user.userId);
     }
 }

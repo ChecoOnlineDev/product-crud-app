@@ -1,7 +1,10 @@
 import { Product } from 'generated/prisma';
 import { IsNotEmpty, IsString, IsNumber, IsOptional } from 'class-validator';
 
-type CreateProductType = Omit<Product, 'id' | 'createdAt' | 'updatedAt'>;
+type CreateProductType = Omit<
+    Product,
+    'id' | 'createdAt' | 'updatedAt' | 'deletedAt'
+>;
 
 export class CreateProductDto implements CreateProductType {
     @IsNumber()

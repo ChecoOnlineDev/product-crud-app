@@ -58,7 +58,10 @@ export class ProductsService {
     ): Promise<ProductResponseDto> {
         try {
             const createProduct = await this.prisma.product.create({
-                data: createProductData,
+                data: {
+                    ...createProductData,
+                    userId: userId,
+                },
             });
             return plainToInstance(ProductResponseDto, createProduct);
         } catch (error) {
@@ -76,11 +79,13 @@ export class ProductsService {
     async updateProduct(
         productId: number,
         updateProductData: UpdateProductDto,
+        userId: number,
     ): Promise<ProductResponseDto> {
         try {
             const updateProduct = await this.prisma.product.update({
                 where: {
                     id: productId,
+                    userId: userId,
                 },
                 data: updateProductData,
             });
@@ -98,11 +103,12 @@ export class ProductsService {
         }
     }
 
-    async deleteProduct(productId: number) {
+    async deleteProduct(productId: number, userId: number) {
         try {
             await this.prisma.product.delete({
                 where: {
                     id: productId,
+                    userId: userId,
                 },
             });
             return `El producto con el Id ${productId} ha sido eliminado correctamente.`;
@@ -119,12 +125,16 @@ export class ProductsService {
         }
     }
 
-    async deleteAllProducts() {
-        await this.prisma.product.deleteMany();
+    async deleteAllProducts(userId: number) {
+        await this.prisma.product.deleteMany({
+            where: {
+                userId: userId,
+            },
+        });
         return 'Todos los registros de la tabla han sido eliminados correctamente';
     }
 
-    //Solo funciona para Sqlite, de querer usar otro motor db, usar truncate en lugar de DELETE FROM
+    //Diseñada para postgresql
     async resetAllProducts() {
         try {
             await this.prisma.$executeRawUnsafe(
